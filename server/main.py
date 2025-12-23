@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 app = FastAPI()
 
-# הגדרת CORS - מאפשר לריאקט (שרץ בפורט אחר) לדבר עם פייתון
+# הגדרת CORS
 origins = [
-    "http://localhost:5173", # הפורט הסטנדרטי של Vite/React
-    "http://localhost:3000", # למקרה שאתה משתמש ב-Create React App
-    "*" # או פשוט לאפשר לכולם בשלב הפיתוח
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "*"
 ]
 
 app.add_middleware(
@@ -21,45 +21,69 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- מודל הנתונים (מגדיר איזה מידע אנחנו מצפים לקבל) ---
+# --- מודל הנתונים ---
 class RideSchema(BaseModel):
     driver_name: str
     destination: str
     departure_minutes: int
-    departure_time: str # הריאקט שולח את הזמן המחושב
+    departure_time: str
 
-# --- מסד נתונים בזיכרון ---
+# --- מסד נתונים בזיכרון (מתנקה כשהשרת נסגר) ---
 rides_db = []
 id_counter = 1
 
 # --- נתיבים (Routes) ---
 
-# GET - קבלת כל הנסיעות
 @app.get("/api/rides")
 def get_rides():
-    # מיון הרשימה כך שהחדש ביותר יהיה ראשון (כמו ב-base44)
-    # אנחנו משתמשים ב-created_date שנוסיף בצד השרת
-    return sorted(rides_db, key=lambda x: x['created_date'], reverse=True)
+    global rides_db
+    
+    # 1. קבלת הזמן הנוכחי ב-UTC (כי הריאקט שולח זמן ב-UTC)
+    now_utc = datetime.now(timezone.utc)
+    
+    # 2. סינון הרשימה: השאר רק נסיעות שעדיין רלוונטיות
+    # הלוגיקה: זמן עכשיו < זמן יציאה + 10 דקות
+    valid_rides = []
+    
+    for ride in rides_db:
+        try:
+            # המרת מחרוזת הזמן חזרה לאובייקט זמן של פייתון
+            # ה-replace נדרש כי פייתון לפעמים מתקשה עם ה-Z בסוף המחרוזת
+            ride_time = datetime.fromisoformat(ride["departure_time"].replace("Z", "+00:00"))
+            
+            # בדיקה האם הנסיעה עדיין בתוקף (עד 10 דקות אחרי היציאה)
+            if now_utc < ride_time + timedelta(minutes=10):
+                valid_rides.append(ride)
+            else:
+                # אופציונלי: הדפסה ללוג שהנסיעה נמחקה
+                print(f"Ride expired and deleted: {ride['driver_name']} to {ride['destination']}")
+                
+        except Exception as e:
+            print(f"Date parsing error: {e}")
+            # במקרה של שגיאה נשמור את הנסיעה ליתר ביטחון
+            valid_rides.append(ride)
 
-# POST - יצירת נסיעה חדשה
+    # 3. עדכון הזיכרון של השרת - הנסיעות הישנות נמחקות לצמיתות ברגע זה
+    rides_db = valid_rides
+    
+    # 4. החזרת הרשימה הנקייה והממוינת
+    return sorted(rides_db, key=lambda x: x['departure_time'])
+
 @app.post("/api/rides")
 def create_ride(ride: RideSchema):
     global id_counter
     
-    # המרת המידע למילון (Dictionary)
     new_ride = ride.dict()
-    
-    # הוספת שדות שהשרת מנהל
     new_ride['id'] = id_counter
-    new_ride['created_date'] = datetime.now().isoformat()
+    # שמירת תאריך יצירה (לצרכי מיון אם צריך)
+    new_ride['created_date'] = datetime.now(timezone.utc).isoformat()
     
     id_counter += 1
     rides_db.append(new_ride)
     
-    print(f"New ride created: {new_ride['driver_name']} to {new_ride['destination']}")
+    print(f"New ride created: {new_ride['driver_name']}")
     return new_ride
 
 if __name__ == "__main__":
     import uvicorn
-    # הרצת השרת בפורט 8000
     uvicorn.run(app, host="0.0.0.0", port=8000)
