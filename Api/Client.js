@@ -26,7 +26,29 @@ export const base44 = {
                     throw error;
                 }
             },
+            // --- הוספנו את החלק הזה: ניהול משתמשים ---
+        User: {
+            create: async (userData) => {
+                // המרת הגיל למספר (כי מהטופס זה מגיע לפעמים כטקסט)
+                const payload = {
+                    ...userData,
+                    age: parseInt(userData.age)
+                };
 
+                const response = await fetch(`${BASE_URL}/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to create user: ${errorText}`);
+                }
+                return response.json();
+            }
+        },
+    
             // קבלת רשימת נסיעות
             list: async (sortOrder = '-created_date') => {
                 try {

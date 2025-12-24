@@ -7,11 +7,14 @@ from typing import List, Optional
 app = FastAPI()
 
 # הגדרת CORS
-origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "*"
-]
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,17 +25,33 @@ app.add_middleware(
 )
 
 # --- מודל הנתונים ---
+# 1. המודל החדש של המשתמש (הוספנו את זה)
+class UserSchema(BaseModel):
+    firstName: str
+    lastName: str
+    address: str
+    age: int  # שים לב שזה מספר
+
 class RideSchema(BaseModel):
     driver_name: str
     destination: str
     departure_minutes: int
     departure_time: str
+    seats: int
 
 # --- מסד נתונים בזיכרון (מתנקה כשהשרת נסגר) ---
+# --- מסד נתונים זמני (In-Memory DB) ---
 rides_db = []
-id_counter = 1
+users_db = [] # 2. רשימה חדשה לשמירת המשתמשים
 
 # --- נתיבים (Routes) ---
+
+# נתיב לקליטת משתמש חדש (הוספנו את זה)
+@app.post("/api/users")
+async def create_user(user: UserSchema):
+    print(f"New user registered: {user.firstName} {user.lastName}") # נדפיס בטרמינל שנראה שזה עובד
+    users_db.append(user)
+    return {"status": "success", "message": "User created successfully", "data": user}
 
 @app.get("/api/rides")
 def get_rides():
