@@ -8,7 +8,7 @@ import RideForm from "../Components/sendride/RideForm";
 import SuccessNotification from "../Components/sendride/SuccessNotification";
 
 export default function SendRide() {
-    const [driverName, setDriverName] = useState("");
+    //const [driverName, setDriverName] = useState("");
     const [destination, setDestination] = useState("");
     const [departureMinutes, setDepartureMinutes] = useState(0);
     const [showSuccess, setShowSuccess] = useState(false);

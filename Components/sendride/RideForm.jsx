@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
@@ -15,6 +15,25 @@ export default function RideForm({
     onSubmit,
     isSubmitting
 }) {
+    // מילוי אוטומטי של פרטי הנהג
+    useEffect(() => {
+        // מנסים לקרוא את פרטי המשתמש מהזיכרון
+        const savedUser = localStorage.getItem('tremp_userData');
+        
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            // מעדכנים את הטופס אוטומטית עם השם המלא
+            const fullName = `${user.firstName} ${user.lastName}`;
+            
+            // כאן אנחנו מניחים שיש לך setFormData או דרך לעדכן את השדה של הנהג
+            // נניח שה-State שלך נקרא formData
+            setFormData(prev => ({
+                ...prev,
+                driverName: fullName, // או driver_name תלוי איך קראת לזה
+                origin: user.address  // בונוס: ברירת מחדל למוצא היא הכתובת שלו!
+            }));
+        }
+    }, []);
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             {/* שדה מי אני */}

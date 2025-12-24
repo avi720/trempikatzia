@@ -18,11 +18,15 @@ export default function OnboardingPage({ onComplete }) {
     try {
         console.log("שולח נתונים לשרת...", formData);
         
-        // שליחה לשרת הפייתון
+        // 1. שליחה לשרת (כבר קיים)
         await base44.entities.User.create(formData);
         
+        // 2. חדש: שמירת פרטי המשתמש בדפדפן כדי להשתמש בהם אחר כך
+        // אנחנו שומרים אותם כטקסט (JSON string)
+        localStorage.setItem('tremp_userData', JSON.stringify(formData));
+
         console.log("המשתמש נשמר בהצלחה!");
-        onComplete(); // רק אם השמירה הצליחה, עוברים הלאה
+        onComplete(); 
 
     } catch (error) {
         console.error("שגיאה בשמירת המשתמש:", error);

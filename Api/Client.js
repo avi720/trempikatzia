@@ -1,10 +1,11 @@
-// api/Client.js
+// Api/Client.js
 
 // הפניה לשרת הפייתון המקומי שלך
 const API_URL = "/api";
 
 export const base44 = {
     entities: {
+        // --- ישות הנסיעות ---
         Ride: {
             // יצירת נסיעה חדשה
             create: async (rideData) => {
@@ -26,29 +27,7 @@ export const base44 = {
                     throw error;
                 }
             },
-            // --- הוספנו את החלק הזה: ניהול משתמשים ---
-        User: {
-            create: async (userData) => {
-                // המרת הגיל למספר (כי מהטופס זה מגיע לפעמים כטקסט)
-                const payload = {
-                    ...userData,
-                    age: parseInt(userData.age)
-                };
-
-                const response = await fetch(`${BASE_URL}/users`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Failed to create user: ${errorText}`);
-                }
-                return response.json();
-            }
-        },
-    
+            
             // קבלת רשימת נסיעות
             list: async (sortOrder = '-created_date') => {
                 try {
@@ -62,6 +41,30 @@ export const base44 = {
                     return []; // מחזיר רשימה ריקה במקרה של שגיאה כדי שהאתר לא יקרוס
                 }
             }
-        }
-    }
+        }, // <--- סגירת Ride
+
+        // --- ישות המשתמשים (עכשיו היא בחוץ, כמו שצריך) ---
+        User: {
+            create: async (userData) => {
+                // המרת הגיל למספר
+                const payload = {
+                    ...userData,
+                    age: parseInt(userData.age)
+                };
+
+                // תיקון: שימוש ב-API_URL
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to create user: ${errorText}`);
+                }
+                return response.json();
+            }
+        } // <--- סגירת User
+    } // <--- סגירת entities
 };
