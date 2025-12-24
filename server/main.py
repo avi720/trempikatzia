@@ -1,4 +1,11 @@
 import sqlite3
+import os
+
+# מוצא את הנתיב של התיקייה שבה נמצא הקובץ main.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# מגדיר שה-DB תמיד יהיה בתיקייה הזו
+DB_NAME = os.path.join(BASE_DIR, "database.db")
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
