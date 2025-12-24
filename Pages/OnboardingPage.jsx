@@ -1,10 +1,11 @@
-import { base44 } from "../Api/Client"; // שים לב לנתיב המדויק שלך (Api / services)
+import { base44 } from "../Api/Client";
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { User, MapPin, Calendar, CheckCircle } from 'lucide-react';
 
-export default function OnboardingPage({ onComplete }) {
-  // ניהול המידע בטופס
+// מקבלים את initialAuth (אימייל וסיסמה) מהדף הקודם
+export default function OnboardingPage({ onComplete, initialAuth }) {
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -15,15 +16,23 @@ export default function OnboardingPage({ onComplete }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // איחוד הנתונים: מה שמילאנו עכשיו + האימייל והסיסמה מהשלב הקודם
+    const completeData = {
+        ...formData,
+        email: initialAuth.email,
+        password: initialAuth.password
+    };
+
     try {
-        console.log("שולח נתונים לשרת...", formData);
+        console.log("שולח נתונים מלאים לשרת...", completeData);
         
-        // 1. שליחה לשרת (כבר קיים)
-        await base44.entities.User.create(formData);
+        await base44.entities.User.create(completeData);
         
-        // 2. חדש: שמירת פרטי המשתמש בדפדפן כדי להשתמש בהם אחר כך
-        // אנחנו שומרים אותם כטקסט (JSON string)
-        localStorage.setItem('tremp_userData', JSON.stringify(formData));
+        // שמירה לזיכרון כדי שנישאר מחוברים
+        localStorage.setItem('tremp_userData', JSON.stringify(completeData));
+        // סימון שהתהליך הושלם
+        localStorage.setItem('tremp_onboardingDone', 'true');
+        localStorage.setItem('tremp_isLoggedIn', 'true');
 
         console.log("המשתמש נשמר בהצלחה!");
         onComplete(); 
@@ -38,8 +47,8 @@ export default function OnboardingPage({ onComplete }) {
     <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
       <Card className="w-full max-w-md bg-slate-800 border-slate-700 text-white">
         <CardHeader>
-          <CardTitle className="text-xl text-center text-teal-400">ברוכים הבאים! 👋</CardTitle>
-          <p className="text-center text-slate-400 text-sm">בוא נכיר אותך קצת כדי שהנסיעות יהיו בטוחות יותר</p>
+          <CardTitle className="text-xl text-center text-teal-400">השלמת פרופיל</CardTitle>
+          <p className="text-center text-slate-400 text-sm">שלב 2 מתוך 2: פרטים אישיים</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,7 +61,6 @@ export default function OnboardingPage({ onComplete }) {
                   <input 
                     type="text" 
                     className="w-full p-2 pr-9 rounded bg-slate-900 border border-slate-700 text-white text-sm focus:ring-1 focus:ring-teal-500"
-                    placeholder="ישראל"
                     required
                     onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                   />
@@ -63,7 +71,6 @@ export default function OnboardingPage({ onComplete }) {
                 <input 
                   type="text" 
                   className="w-full p-2 rounded bg-slate-900 border border-slate-700 text-white text-sm focus:ring-1 focus:ring-teal-500"
-                  placeholder="ישראלי"
                   required
                   onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                 />
@@ -77,7 +84,6 @@ export default function OnboardingPage({ onComplete }) {
                 <input 
                   type="text" 
                   className="w-full p-2 pr-9 rounded bg-slate-900 border border-slate-700 text-white text-sm focus:ring-1 focus:ring-teal-500"
-                  placeholder="רחוב, עיר"
                   required
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                 />
@@ -93,7 +99,6 @@ export default function OnboardingPage({ onComplete }) {
                   min="16"
                   max="120"
                   className="w-full p-2 pr-9 rounded bg-slate-900 border border-slate-700 text-white text-sm focus:ring-1 focus:ring-teal-500"
-                  placeholder="18"
                   required
                   onChange={(e) => setFormData({...formData, age: e.target.value})}
                 />
@@ -104,7 +109,7 @@ export default function OnboardingPage({ onComplete }) {
               type="submit"
               className="w-full mt-6 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white p-2 rounded-md font-bold transition-all shadow-lg flex justify-center items-center gap-2"
             >
-              סיימתי, בוא נתחיל!
+              סיום והרשמה
               <CheckCircle className="w-5 h-5" />
             </button>
           </form>

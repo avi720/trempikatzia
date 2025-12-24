@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
@@ -21,19 +21,20 @@ export default function RideForm({
         const savedUser = localStorage.getItem('tremp_userData');
         
         if (savedUser) {
-            const user = JSON.parse(savedUser);
-            // מעדכנים את הטופס אוטומטית עם השם המלא
-            const fullName = `${user.firstName} ${user.lastName}`;
-            
-            // כאן אנחנו מניחים שיש לך setFormData או דרך לעדכן את השדה של הנהג
-            // נניח שה-State שלך נקרא formData
-            setFormData(prev => ({
-                ...prev,
-                driverName: fullName, // או driver_name תלוי איך קראת לזה
-                origin: user.address  // בונוס: ברירת מחדל למוצא היא הכתובת שלו!
-            }));
+            try {
+                const user = JSON.parse(savedUser);
+                const fullName = `${user.firstName} ${user.lastName}`;
+                
+                // בדיקה אם השדה ריק לפני שדורסים אותו (כדי לא להפריע אם המשתמש כבר הקליד)
+                if (!driverName) {
+                    setDriverName(fullName);
+                }
+            } catch (e) {
+                console.error("Error parsing user data", e);
+            }
         }
-    }, []);
+    }, []); // רץ רק פעם אחת כשהטופס עולה
+
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             {/* שדה מי אני */}

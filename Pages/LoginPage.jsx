@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/Components/ui/card"; // וודא שהנתיב תואם למה שיש אצלך
 import { Mail, Lock, LogIn } from 'lucide-react';
+import { base44 } from "../Api/Client"; // וודא שהנתיב נכון
 
-export default function LoginPage({ onLoginSuccess }) {
+export default function LoginPage({ onLoginSuccess, onRegisterClick }) {
   
   const handleLogin = (e) => {
     e.preventDefault();
@@ -78,7 +79,13 @@ export default function LoginPage({ onLoginSuccess }) {
           </form>
 
           <div className="text-center text-sm text-slate-400 mt-4">
-            אין לך חשבון? <span className="text-teal-400 cursor-pointer hover:underline">הירשם עכשיו</span>
+            אין לך חשבון?{' '}
+            <span 
+              onClick={onRegisterClick}
+              className="text-teal-400 cursor-pointer hover:underline font-bold"
+            >
+              הירשם עכשיו
+            </span>
           </div>
 
         </CardContent>
