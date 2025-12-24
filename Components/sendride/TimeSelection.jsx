@@ -1,5 +1,5 @@
 import React from "react";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 import { Clock } from "lucide-react";
 
 export default function TimeSelection({ selectedTime, onSelectTime }) {

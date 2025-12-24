@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { base44 } from "../api/Client";
+import { base44 } from "../Api/Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/Components/ui/card";
 import { Car } from "lucide-react";
 import { motion } from "framer-motion";
 import RideForm from "../Components/sendride/RideForm";

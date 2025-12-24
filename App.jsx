@@ -11,13 +11,18 @@ export default function App() {
             {/* כפתור ניווט צף בפינה */}
             <button
                 onClick={() => setCurrentPage(currentPage === 'display' ? 'send' : 'display')}
-                style={{ top: '25px', right: '15px' }}
-                className="fixed top-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/50 hover:bg-white/20 hover:text-white transition-all shadow-xl group"
+                style={{ 
+                    top: '25px', 
+                    right: '15px', 
+                    width: '40px', 
+                    height: '40px' 
+                }}
+                className="fixed top-6 z-50 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-black/20 text-white/50 hover:bg-white/20 hover:text-white transition-all shadow-xl group"
                 title={currentPage === 'display' ? "מעבר לשליחת נסיעה" : "חזרה ללוח"}
             >
                 {currentPage === 'display' ? (
                     // אם אנחנו בלוח -> הראה חץ ליציאה/חזרה למסך שליחה
-                    <ArrowRight className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" />
+                    <ArrowRight className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform text-white" />
                 ) : (
                     // אם אנחנו במסך שליחה -> הראה מסך לחזרה ללוח
                     <Monitor className="w-6 h-6" />
